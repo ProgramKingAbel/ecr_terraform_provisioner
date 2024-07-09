@@ -25,3 +25,15 @@ resource "null_resource" "image" {
    EOF
   }
 }
+
+resource "aws_ecr_repository" "ecr" {
+  name = "catest"
+  provisioner "local-exec" {
+    when = destroy
+    command = <<EOF
+    $(aws ecr get-login --region us-west-2 --no-include-email)
+    docker pull ${self.repository_url}:latest
+    docker save --output catest.tar ${self.repository_url}:latest 
+    EOF
+  }
+}
